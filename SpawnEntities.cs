@@ -37,8 +37,11 @@ public class SpawnEntities : MonoBehaviour
 
         Vector3 spawnAreaPosition = new Vector3(randomBoundX, transform.position.y, randomBoundZ);
 
-        Debug.Log(randomBoundX + ", " + randomBoundZ);
+        Instantiate(gameObjectPrefabs[PickRandomEnemy()], spawnAreaPosition, Quaternion.identity);
+    }
 
-        Instantiate(gameObjectPrefabs[0], spawnAreaPosition, Quaternion.identity);
+    private int PickRandomEnemy() {
+        int randEnemyID = Random.Range(0, gameObjectPrefabs.Length);
+        return randEnemyID;
     }
 }
