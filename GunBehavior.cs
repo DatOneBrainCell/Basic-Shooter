@@ -4,10 +4,18 @@ using UnityEngine;
 
 public class GunBehavior : MonoBehaviour
 {
-    //[SerializeField] private GameObject arrow;
+    [Header("References")]
+    [SerializeField] private GameObject fpsCamera;
+    [SerializeField] private Animator gunAnimator;
+    [SerializeField] private Transform bulletShotPosition;
 
+    [Header("Particles")]
+    [SerializeField] private ParticleSystem bulletHitParticle;
+    [SerializeField] private ParticleSystem bulletShotParticle;
+
+    [Header("Values")]
     [SerializeField] private int damageAmt;
-    [SerializeField] private float attackInterval;
+    [SerializeField] private float attackCooldown;
     [SerializeField] private float maxDistance;
 
     [SerializeField] private LayerMask enemyLayer;
@@ -15,61 +23,46 @@ public class GunBehavior : MonoBehaviour
     private RaycastHit enemyHit;
     private Stats enemyStats;
 
-    private const string ENEMY = "Enemy";
+    private float attackTimeCounter = 0f;
 
-    private void Start() {
+    private void Update() {
+        
+        bool canShootVar = CanShoot();
 
-        StartCoroutine(nameof(ShootCoroutine));
-    }
+        if(Input.GetKeyDown(KeyCode.Mouse0) && canShootVar) {
 
-    private IEnumerator ShootCoroutine() {
-
-        Debug.Log("Pew0");
-        for(int i = 0; i <= 15; i++) {
-
-            Debug.Log("Pew1");
-
-            if (Input.GetKeyDown(KeyCode.Mouse0)) {
-
-                Debug.Log("Pew2");
-                Shoot();
-                yield return new WaitForSeconds(attackInterval); //YIELD RETURN DOESNT GIVE TIME FOR US TO INPUT ANYTHING
-            }
+            //gunAnimator.Play(shoot_animation);
+            gunAnimator.SetBool("Shot", true);
+            Shoot();
+            attackTimeCounter = 0f;
         }
     }
 
     private void Shoot() {
 
-        Debug.Log("Pew");
+        if (Physics.Raycast(fpsCamera.transform.position, fpsCamera.transform.forward, out enemyHit, maxDistance, enemyLayer)) {
 
-        if(Physics.Raycast(transform.position, transform.forward, out enemyHit, maxDistance, enemyLayer)) {
-
+            Instantiate(bulletShotParticle, bulletShotPosition);
+            Instantiate(bulletHitParticle, enemyHit.point, enemyHit.transform.rotation);
             enemyStats = enemyHit.transform.GetComponent<Stats>();
 
             enemyStats.Damage(damageAmt);
         }
-        
     }
-    void OnDrawGizmos() {
-        Debug.DrawRay(transform.position, transform.forward * maxDistance);
+
+    private bool CanShoot() {
+
+        if(attackTimeCounter >= attackCooldown) {
+
+            gunAnimator.SetBool("Shot", false);
+            return true;
+        }
+        attackTimeCounter += Time.deltaTime;
+        return false;
     }
-    //private void Shoot() {
 
-    //    transform.Translate(transform.forward * moveSpeed * Time.deltaTime);
-
-    //    if(transform.position.z > maxDistance) {
-    //        Destroy(gameObject);
-    //    }
-    //}
-
-    //private void OnCollisionEnter(Collision collision) {
-
-    //    if (collision.gameObject.tag == ENEMY) {
-
-    //        Debug.Log("Destroyed " + collision.gameObject + " and " + gameObject);
-    //        Destroy(collision.gameObject);
-    //        Destroy(gameObject);
-    //    }
-    //}
+    private void OnDrawGizmos() {
+        Debug.DrawRay(fpsCamera.transform.position, fpsCamera.transform.forward * maxDistance);
+    }
 
 }
