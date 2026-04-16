@@ -1,8 +1,9 @@
 using System.Collections;
 using UnityEngine;
 
-public class EnemyMovement : MonoBehaviour
+public class EnemyBehaviour : MonoBehaviour
 {
+    [SerializeField] private Transform targetCheckStartPos;
 
     [SerializeField] private float moveSpeed;
     [SerializeField] private float maxDistance;
@@ -12,9 +13,9 @@ public class EnemyMovement : MonoBehaviour
     private GameObject player;
 
     private const string PLAYER = "Player";
-    private const string ENEMY = "Enemy";
 
     private void Start() {
+
         player = GameObject.FindGameObjectWithTag(PLAYER);
     }
 
@@ -32,7 +33,8 @@ public class EnemyMovement : MonoBehaviour
             transform.LookAt(playerLookAtPosition);
             transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
         }
-        if(transform.position.z <= maxDistance) {
+        
+        if (transform.position.z <= maxDistance) {
             Debug.Log(transform.position);
             Destroy(gameObject);
         }
@@ -48,9 +50,10 @@ public class EnemyMovement : MonoBehaviour
 
     private bool AllyHitCheck() {
 
-        if (Physics.Raycast(transform.position + transform.up, transform.forward, rayHitDistance)) {
+        if (Physics.Raycast(targetCheckStartPos.position, targetCheckStartPos.forward, rayHitDistance)) {
             return true;
         }
         return false;
     }
+
 }
